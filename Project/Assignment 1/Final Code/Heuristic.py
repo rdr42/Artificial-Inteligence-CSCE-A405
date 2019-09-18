@@ -10,12 +10,10 @@ class Heuristic:
   def hMethod(self):
     m = Method(self.start,self.goal)
     if self.n == 0:
-      return m.bfs()
-    elif self.n == 1:
-      return m.aMisplaced()
-    elif self.n == 2:
-      return m.aManhattan()
-    elif self.n == 3:
-      return m.aGaschnig()
+      return m.BFS()
+    if self.n == 1:
+      return m.MISP()
+    if self.n == 2:
+      return m.MAN()
     else:
       return 'error'
