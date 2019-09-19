@@ -35,7 +35,11 @@ class Method:
     done = False
     found = None
 
+    maxOpenSize = 0
+
     while len(queue) > 0 and not done:
+      if len(queue) > maxOpenSize:
+      	maxOpenSize = len(queue)
       v = queue.pop()
       if v.board not in discovered:
         discovered.append(v.board)
@@ -66,6 +70,8 @@ class Method:
       for i in queue:
         g.addNewNode(i)
 
+    print("Max size of open list: ", maxOpenSize)
+    print("Amount of nodes visited: ", len(discovered))
     parent = []
     done = False
     c = found.cost
@@ -101,7 +107,11 @@ class Method:
     done = False
     found = None
 
+    maxOpenSize = 0
+
     while len(queue) > 0 and not done:
+      if len(queue) > maxOpenSize:
+      	maxOpenSize = len(queue)
       v = queue.pop()
       if v.board not in discovered:
         discovered.append(v.board)
@@ -123,8 +133,8 @@ class Method:
           break
         else:
           if newBoard not in discovered and newBoard != start:
-            if(v.h + v.g <= newNode.h + newNode.g):
-              queue.append(newNode)
+            #if(v.h + v.g <= newNode.h + newNode.g):
+            queue.append(newNode)
         if done:
           break
 
@@ -132,6 +142,8 @@ class Method:
       for i in queue:
         g.addNewNode(i)
 
+    print("Max size of open list: ", maxOpenSize)
+    print("Amount of nodes visited: ", len(discovered))
     self.displayPath(found,b)
       
 
@@ -160,7 +172,11 @@ class Method:
     done = False
     found = None
 
+    maxOpenSize = 0
+
     while len(queue) > 0 and not done:
+      if len(queue) > maxOpenSize:
+      	maxOpenSize = len(queue)
       v = queue.pop()
       if v.board not in discovered:
         discovered.append(v.board)
@@ -183,14 +199,18 @@ class Method:
           break
         else:
           if newBoard not in discovered and newBoard != start:
-            if(v.h + v.g <= newNode.h + newNode.g):
-              queue.append(newNode)
+            #if(v.h + v.g <= newNode.h + newNode.g):
+            queue.append(newNode)
         if done:
           break
 
       queue.sort(key=lambda obj: obj.g + obj.h , reverse=True)
       for i in queue:
         g.addNewNode(i)
+
+    print("Max size of open list: ", maxOpenSize)
+    print("Amount of nodes visited: ", len(discovered))
+    self.displayPath(found,b)
 
   def manhattanDistance(self,currentBoard, endBoard): # two 1d arrays
     distance = 0
