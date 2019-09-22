@@ -41,11 +41,3 @@ class Board:
     print("")
     print("||",el[6],"|",el[7],"|",el[8],"||")
     print(" ------------- ")
-  
-  #Given a board, calculates the total number of misplaced tiles
-  def tilesOutOfPlace(self,currentBoard, endBoard):
-    tilesOut = 0
-    for i in range(1,9):
-        if currentBoard.index(i) != endBoard.index(i):
-            tilesOut += 1
-    return tilesOut

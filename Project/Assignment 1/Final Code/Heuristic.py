@@ -11,9 +11,5 @@ class Heuristic:
     m = Method(self.start,self.goal)
     if self.n == 0:
       return m.BFS()
-    if self.n == 1:
-      return m.MISP()
-    if self.n == 2:
-      return m.MAN()
     else:
-      return 'error'
+      return m.aStar(self.n)
