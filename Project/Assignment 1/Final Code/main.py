@@ -34,7 +34,6 @@ def main():
 	startBoard = input("\nStart State: ").split(",")
 	endBoard =   input("\nEnd State:   ").split(",")
 	
-	print(len(startBoard), len(endBoard))
 	if (len(startBoard) != 9) or (len(endBoard) != 9):
 		print("Must enter 9 values for each state, exiting.")
 		exit()
@@ -54,13 +53,16 @@ def main():
 	h1 = Heuristic(0, startBoard, endBoard)
 	h2 = Heuristic(1, startBoard, endBoard)
 	h3 = Heuristic(2, startBoard, endBoard)
-	
+	h4 = Heuristic(3, startBoard, endBoard)
 	print("\nRunning BFS")
 	h1.hMethod()
 	print("\nRunning Tiles Out of Place")
 	h2.hMethod()
 	print("\nRunning Manhattan Distance")
 	h3.hMethod()
+	print("\nRunning Gaschnig")
+	h4.hMethod()
+
 
 
 # This calls our main function
