@@ -1,4 +1,7 @@
 from pandas import *
+from Node import *
+from Graph import *
+
 def getStockValues():
 	df = pandas.read_csv("stocks.csv")
 	companyNames = df['Company']
@@ -8,21 +11,6 @@ def getStockValues():
 		stockDic[dfDic["Company"][company]] = {"Price" : dfDic["Price"][company], "Change" : dfDic["Change"][company], "% Change" : dfDic["% Change"][company], "Volume" :  dfDic["Volume"][company], "YTD Change" : dfDic["YTD Change"][company]}
 	return stockDic
 
-class Node:
-  def __init__(self,company,price,change,pChange,volume,ytd_change):
-    self.company = company
-    self.price = price
-    self.change = change
-    self.percentChange = pChange
-    self.volume = volume
-    self.ytd_change = ytd_change
-
-class Graph():
-  def __init__(self):
-    self.nodes = []
-  
-  def addNode(self,node):
-    self.nodes.append(node)
 
 g = Graph()
 x = getStockValues()
