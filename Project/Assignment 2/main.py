@@ -114,9 +114,23 @@ counter = 0
 for i in g.nodes:
   print("Stock ID:" ,counter,"| Company Name: ",i.company,", Price:", i.price)
   counter += 1
-tfb_choice = input("Enter the Stock IDs followed by a comma and hit enter:\nExample: 1,0,2,9,3,0,4,9,5,1\n").split(",")
+tfb_choice = input("Enter the Stock IDs followed by a comma and hit enter:\nExample: 10,0,2,9,3,20,4,19,5,1\n").split(",")
 
 listNodes = []
 for i in tfb_choice:
   listNodes.append(g.nodes[int(i)])
 annealing(listNodes)
+hillclimbing(listNodes)
+
+def getDeltaError(sender, reciever):
+	currentValue = sender.investment + sender.investment * sender.percentChange
+	currentValue += reciever.investment + reciever.investment * reciever.percentChange
+	tempRec = reciever.investment + sender.investment * 0.1
+	tempSend = sender.investment - sender.investment * 0.1
+	futureValue = tempRec + tempRec * reciever.percentChange
+	futureValue += tempSend + tempSend * sender.percentChange
+	return futureValue - currentValue
+
+
+def hillClimbing(nodeList):
+	while 
