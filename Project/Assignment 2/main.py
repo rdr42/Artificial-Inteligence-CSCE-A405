@@ -1,3 +1,7 @@
+# Assignment 2
+# main.py
+# EJ, Rafael, Hunter
+
 from pandas import *
 from Node import *
 from Graph import *
@@ -8,6 +12,8 @@ from random import shuffle as shuffle
 from random import seed as seed
 from copy import copy
 from copy import deepcopy
+import csv
+#Function reads stock values form csv
 def getStockValues():
 	df = pandas.read_csv("stocks.csv")
 	companyNames = df['Company']
@@ -18,24 +24,7 @@ def getStockValues():
 	return stockDic
 
 
-
-def probability(energyA, energyB, temp):
- 	if(energyB < energyA):
- 	 	return 1.0
- 	delta = (energyA - energyB)
- 	eq = delta / temp
- 	return exp(eq)
-
-
-
-
-def probability(energyA, energyB, temp):
- 	if(energyB < energyA):
- 	 	return 1.0
- 	delta = (energyA - energyB)
- 	eq = delta / temp
- 	return exp(eq)
-
+#Function gets delta error based on what variable is sending money to the other
 def getDeltaError(sender, reciever):
 	currentValue = sender.investment + sender.investment * sender.percentChange
 	currentValue += reciever.investment + reciever.investment * reciever.percentChange
@@ -45,17 +34,18 @@ def getDeltaError(sender, reciever):
 	futureValue += tempSend + tempSend * sender.percentChange
 	return futureValue - currentValue
 
-
+# Annealing function
 def annealing(nodes):
- 	setNodes = copy(nodes)
+	# Get initial data to run annealing
+ 	setNodes = copy(nodes) 
  	temp = 1000000 #Set temperature
  	cooling_rate = 0.00003 #Set cooling factor
- 	counter = 0
- 	while temp > 1:
+ 	while temp > 1: #While our temparature is not approximately 1
  	 	randIndex = randint(0,len(setNodes)-1)
  	 	S1 = setNodes[randIndex]
  	 	randIndex2 = randint(0,len(setNodes)-1) 
  	 	S2 = setNodes[randIndex2] #another random node from array of nodes 	
+		#Make sure we have 2 distinct values for S1 and S2
  	 	if S1.company == S2.company:
  	 	 	done = False
  	 	 	while not done:
@@ -63,10 +53,12 @@ def annealing(nodes):
  	 	 	 	S2 = setNodes[randIndex2]
  	 	 	 	if S2.company != S1.company:
  	 	 	 	 	done = True
+		#Assign temporary variables that contain S1 and S2 information
  	 	tempS1 = Node(S1.company,S1.price,S1.change,S1.percentChange,S1.volume,S1.ytd_change)
  	 	tempS1.investment = S1.investment
  	 	tempS2 = Node(S2.company,S2.price,S2.change,S2.percentChange,S2.volume,S2.ytd_change)
  	 	tempS2.investment = S2.investment
+		#Compute if Delta is > 0, if so then make a move. Otherwise, compute probability of accepting a move.
  	 	if (getDeltaError(tempS1,tempS2)>0):
  	 	 	S2.investment += S1.investment *(.1)
  	 	 	S1.investment -= S1.investment *(.1)
@@ -74,6 +66,7 @@ def annealing(nodes):
  	 	 	if(exp(getDeltaError(tempS1,tempS2)/temp) > uniform(0, 1)):
  	 	 	 	S2.investment += S1.investment *(.1)
  	 	 	 	S1.investment -= S1.investment *(.1)
+		#Decrease temperature based on cooling rate
  	 	temp *= (1-cooling_rate)
  	suma = 0
  	for i in setNodes:
@@ -82,13 +75,15 @@ def annealing(nodes):
 
 def hillClimbing(nodeList):
 	# Continue until no state is better than the current state
-	#companyList = nodeList.copy()
 	start = True
+	# number of allowed random restarts
 	i = 10
 	globalMax = (0.0, None)
+	# repeat until number of random restarts runs out
 	while i > 0: 
 		newMax = True
 		companyList = nodeList.copy()
+		# Randomly pick starting investment values of the ten companies after the first restart
 		if not start:
 			totalValue = 10000
 			shuffle(companyList)
@@ -114,19 +109,24 @@ def hillClimbing(nodeList):
 			for receiver in companyList:
 				# Check each node 
 				for sender in companyList:
+					# Skip over itself
 					if sender == receiver:
 						continue
 					deltaE = getDeltaError(sender, receiver)
+					# Found a new best state
 					if deltaE > maxVal:
-						#print(deltaE)
 						maxVal = deltaE
 						move = (receiver, sender)
+			# If no better states were found calculate total value and compare it to the global maximum thus far
+			# This als triggers when the sender has less than 0.01 dollar value
 			if move == None or move[1].investment < 0.01:
+				# Compute sum
 				sumValue = 0
 				for node in companyList:
 					sumValue += (node.investment + node.investment * node.percentChange)
-				
+				# Found a new global max
 				if sumValue > globalMax[0]:
+					# If this is a new maximum increment the number of restarts to avoid local maxima
 					if newMax and not start:
 						i += 5
 						newMax = False
@@ -134,25 +134,19 @@ def hillClimbing(nodeList):
 					for node in companyList:
 						globalMaxList.append(copy(node))
 					globalMax = (sumValue, globalMaxList)
-				
+				# Decrement number of restarts
 				i -= 1
 				break
+			# There was a possible move, take it
 			else:
 				move[0].investment += (move[1].investment * 0.1)
 				move[1].investment -= (move[1].investment * 0.1)
-		
+				
 		start = False
 	return globalMax
 
 
-#print("List of stocks to choose from on:\n")
 def main():
-	#counter = 0
-	#for i in g.nodes:
-	 	#print("Stock ID:" ,counter,"| Company Name: ",i.company,", Price:", i.price)
-	 	#counter += 1
-	#tfb_choice = input("Enter the Stock IDs followed by a comma and hit enter:\nExample: 10,0,2,9,3,20,4,19,5,1\n").split(",")
-	#randomSelections = []
 	g = Graph()
 	x = getStockValues()
 	invest_value = 1000
@@ -170,7 +164,7 @@ def main():
 		node.investment = invest_value
 		g.addNode(node)
 	
-
+	# Create 5 sets of starting companies
 	randomSelections = []
 	for i in range(0,5):
 		randomSelections.append([])
@@ -180,52 +174,51 @@ def main():
 				selection = randint(0,29)
 				randConflict = selection in randomSelections[i]
 			randomSelections[i].append(selection)
+		for collection in randomSelections:
+			listNodes = []
+			hillNodes = []
+			annealingNodes = []
+			companyNames = []
+			for index in collection:
+				#print(g.nodes[int(index)].company, g.nodes[int(index)].investment)
+				companyNames.append(g.nodes[int(index)].company)
+				listNodes.append(g.nodes[int(index)])
+				hillNodes.append(deepcopy(g.nodes[int(index)]))
+				annealingNodes.append(deepcopy(g.nodes[int(index)]))
 
+			print('Printing results for Randomly selected set #', randomSelections.index(collection))
+			print(companyNames, '\n')
+			results = hillClimbing(hillNodes)
+			investSum = results[0]
+			nodes = results[1]
+			print('Hill Climbing Result:')
+			for node in nodes:
+				nodeProfit = node.investment * node.percentChange
+				nodeVal = node.investment + nodeProfit
+				print("Stock: ",node.company, '| Ending value with gain: ', "{0:.2f}".format(nodeVal),'| profit:', "{0:.2f}".format(nodeProfit))
+			
+			print('Total sum of all stocks:', "{0:.2f}".format(investSum), '\n')
 
-	
-	for collection in randomSelections:
-		listNodes = []
-		hillNodes = []
-		annealingNodes = []
-		companyNames = []
-		for index in collection:
-		 	#print(g.nodes[int(index)].company, g.nodes[int(index)].investment)
-		 	companyNames.append(g.nodes[int(index)].company)
-		 	listNodes.append(g.nodes[int(index)])
-		 	hillNodes.append(deepcopy(g.nodes[int(index)]))
-		 	annealingNodes.append(deepcopy(g.nodes[int(index)]))
-
-		print('Printing results for Randomly selected set #', randomSelections.index(collection))
-		print(companyNames, '\n')
-		results = hillClimbing(hillNodes)
-		investSum = results[0]
-		nodes = results[1]
-		print('Hill Climbing Result:')
-		for node in nodes:
-			nodeProfit = node.investment * node.percentChange
-			nodeVal = node.investment + nodeProfit
-			print(node.company, 'Ending value with gain:', "{0:.2f}".format(nodeVal),'profit:', "{0:.2f}".format(nodeProfit))
-		print('Total sum of all stocks:', "{0:.2f}".format(investSum), '\n')
-
-		annealingResults = annealing(annealingNodes)
-		investSum = annealingResults[0]
-		nodes = annealingResults[1]
-		print('Simulated Annealing Results:')
-		for node in nodes:
-			nodeProfit = node.investment * node.percentChange
-			nodeVal = node.investment + nodeProfit
-			print(node.company, 'Ending value with gain:', "{0:.2f}".format(nodeVal),'profit:', "{0:.2f}".format(nodeProfit))
-		print('Total sum of all stocks:', "{0:.2f}".format(investSum), '\n')
+			annealingResults = annealing(annealingNodes)
+			investSum = annealingResults[0]
+			nodes = annealingResults[1]
+			print('Simulated Annealing Results:')
+			for node in nodes:
+				nodeProfit = node.investment * node.percentChange
+				nodeVal = node.investment + nodeProfit
+				print("Stock: ",node.company, '| Ending value with gain: ', "{0:.2f}".format(nodeVal),'| profit:', "{0:.2f}".format(nodeProfit))
 		
-		print('TFB Results')
-		tfbSum = 0
-		for node in listNodes:
-			nodeProfit = node.investment * node.percentChange
-			nodeVal = node.investment + nodeProfit
-			print(node.company, 'Ending value with gain:', "{0:.2f}".format(nodeVal),'profit:', "{0:.2f}".format(nodeProfit))
-			tfbSum += nodeVal
-		print('Total sum of all stocks:', "{0:.2f}".format(tfbSum), '\n')
-
+			print('Total sum of all stocks:', "{0:.2f}".format(investSum), '\n')
+			
+			print('TFB Results')
+			tfbSum = 0
+			for node in listNodes:
+				nodeProfit = node.investment * node.percentChange
+				nodeVal = node.investment + nodeProfit
+				print("Stock: ", node.company, '| Ending value with gain: ', "{0:.2f}".format(nodeVal),'| profit: ', "{0:.2f}".format(nodeProfit))
+				tfbSum += nodeVal
+			
+			print('Total sum of all stocks:', "{0:.2f}".format(tfbSum), '\n')
 
 	
 # node.investment * node.percentChange

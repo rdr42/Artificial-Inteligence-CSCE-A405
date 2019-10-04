@@ -1,3 +1,7 @@
+# Assignment 2
+# Node.py
+# EJ, Rafael, Hunter
+
 class Node:
   def __init__(self,company,price,change,pChange,volume,ytd_change):
     self.company = company
