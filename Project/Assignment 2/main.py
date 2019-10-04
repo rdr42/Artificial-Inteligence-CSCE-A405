@@ -17,16 +17,16 @@ def getStockValues():
 
 g = Graph()
 x = getStockValues()
-invest_value = 100
+invest_value = 0
 
 for i in x:
   price = x[i]['Price']
   change =x[i]['Change']
-  pchange = '%.6f'%(x[i]['% Change']/100)
+  pchange = '%.8f'%(x[i]['% Change']/100)
   volume = float(x[i]['Volume'])
   ytd_change = 0
   if x[i]['YTD Change'] != '--':
-    ytd_change = '%.6f'%(float(x[i]['YTD Change'])/100)
+    ytd_change = '%.8f'%(float(x[i]['YTD Change'])/100)
   node = Node(i,price,change,pchange,volume,ytd_change)
   node.initial_investment = invest_value
   node.investment = invest_value
@@ -42,7 +42,7 @@ def probability(energyA, energyB, temp):
 
 g = Graph()
 x = getStockValues()
-invest_value = 1
+invest_value = 2000
 
 for i in x:
   price = x[i]['Price']
@@ -66,7 +66,7 @@ def probability(energyA, energyB, temp):
 
 def annealing(setNodes):
   temp = 1000 #Set temperature
-  cooling_rate = 0.00003 #Set cooling factor
+  cooling_rate = 0.0003 #Set cooling factor
   randIndex = randint(0,len(setNodes)-1)
   randomSolution =setNodes[randIndex] #Start with Random solution
   bestSolution = randomSolution #Assume this is the best solution for now
@@ -74,16 +74,26 @@ def annealing(setNodes):
   while temp > 1:
     randIndex2 = randint(0,len(setNodes)-1) 
     randomNeighboor = setNodes[randIndex2] #another random node from array of nodes  
+    if randomNeighboor.company == randomSolution.company:
+      done = False
+      while not done:
+        randIndex2 = randint(0,len(setNodes)-1) 
+        randomNeighboor = setNodes[randIndex2]
+        if randomNeighboor.company != randomSolution.company:
+          done = True
 
     tenPercent = randomSolution.investment*(.10) 
-    randomSolution.investment = randomSolution.investment - tenPercent
+    randomSolution.investment -= tenPercent
     randomSolution.loss += tenPercent
     randomNeighboor.investment += tenPercent
     randomNeighboor.gain += tenPercent
 
+    print("SET:")
     randomSolutionEnergy = randomSolution.thirtyDayEarning()
+    print("R1: ",randomSolution.company,", Energy:")
     randomNeighboorEnergy = randomSolution.thirtyDayEarning()
-
+    print("R1: ",randomNeighboor.company,", Energy")
+    print("SET:")
     if(probability(randomSolutionEnergy,randomNeighboorEnergy,temp) > uniform(0, 1)):
       randomSolution = randomNeighboor
 
@@ -92,19 +102,21 @@ def annealing(setNodes):
       bestSolution = randomSolution
 
     temp *= 1-cooling_rate
-    print(temp)
-  print(bestSolution.company, bestSolution.price, bestSolution.investment)
+    #print(temp)
+  print("Best Solution:",bestSolution.company,", Total Investement:",bestSolution.investment)
+  print("Other investments:\n")
+  for i in setNodes:
+    if i.company != bestSolution.company:
+      print(i.company,", Total Investement:",i.investment)
 
-#print("List of stocks to choose:\n")
-#print("I -> Company, Price, Change, % Change, Volume, YTD Change")
-#counter = 0
-#for i in g.nodes:
-#  print(counter,"=Company",i.company,", Price:", i.price,", Change:", i.change,", %Change:", i.percentChange,", Volume:", i.volume,", YTD Change:", i.ytd_change)
-#  counter += 1
+#print("List of stocks to choose from on:\n")
+counter = 0
+for i in g.nodes:
+  print("Stock ID:" ,counter,"| Company Name: ",i.company,", Price:", i.price)
+  counter += 1
+tfb_choice = input("Enter the Stock IDs followed by a comma and hit enter:\nExample: 1,0,2,9,3,0,4,9,5,1\n").split(",")
 
-n = [0,1,2,3,4,5,6,7,8,9]
 listNodes = []
-for i in n:
-  listNodes.append(g.nodes[n[i]])
-
-annealing(g.nodes)
+for i in tfb_choice:
+  listNodes.append(g.nodes[int(i)])
+annealing(listNodes)

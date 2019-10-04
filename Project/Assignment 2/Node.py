@@ -26,8 +26,8 @@ class Node:
 #Should the amount invested be the intial amount invested on all companies initially? Or
 #should it be the amount of the investment at some time i?
   def thirtyDayEarning(self):
-    pGainLoss = self.price - self.investment
-    pGainLoss = pGainLoss / self.price
-    return self.investment * pGainLoss
+   # pGainLoss = self.price - self.investment
+   # pGainLoss = pGainLoss / self.price
+    return self.investment * float(self.percentChange)
 
 
