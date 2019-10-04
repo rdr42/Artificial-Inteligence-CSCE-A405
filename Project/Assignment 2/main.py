@@ -5,7 +5,8 @@ from math import exp as exp
 from random import randint as randint
 from random import uniform as uniform
 from random import shuffle as shuffle
-from copy import copy as copy
+from random import seed as seed
+from copy import copy
 def getStockValues():
 	df = pandas.read_csv("stocks.csv")
 	companyNames = df['Company']
@@ -49,53 +50,6 @@ def probability(energyA, energyB, temp):
   eq = delta / temp
   return exp(eq)
 
-def annealing(setNodes):
-  temp = 1000 #Set temperature
-  cooling_rate = 0.0003 #Set cooling factor
-  randIndex = randint(0,len(setNodes)-1)
-  randomSolution =setNodes[randIndex] #Start with Random solution
-  bestSolution = randomSolution #Assume this is the best solution for now
-
-  while temp > 1:
-    randIndex2 = randint(0,len(setNodes)-1) 
-    randomNeighboor = setNodes[randIndex2] #another random node from array of nodes  
-    if randomNeighboor.company == randomSolution.company:
-      done = False
-      while not done:
-        randIndex2 = randint(0,len(setNodes)-1) 
-        randomNeighboor = setNodes[randIndex2]
-        if randomNeighboor.company != randomSolution.company:
-          done = True
-
-    tenPercent = randomSolution.investment*(.10) 
-    randomSolution.investment -= tenPercent
-    randomSolution.loss += tenPercent
-    randomNeighboor.investment += tenPercent
-    randomNeighboor.gain += tenPercent
-
-    print("SET:")
-    randomSolutionEnergy = randomSolution.thirtyDayEarning()
-    print("R1: ",randomSolution.company,", Energy:")
-    randomNeighboorEnergy = randomSolution.thirtyDayEarning()
-    print("R1: ",randomNeighboor.company,", Energy")
-    print("SET:")
-    if(probability(randomSolutionEnergy,randomNeighboorEnergy,temp) > uniform(0, 1)):
-      randomSolution = randomNeighboor
-
-
-    if (randomSolution.thirtyDayEarning() >= bestSolution.thirtyDayEarning()):
-      bestSolution = randomSolution
-
-    temp *= 1-cooling_rate
-    #print(temp)
-  print("Best Solution:",bestSolution.company,", Total Investement:",bestSolution.investment)
-  print("Other investments:\n")
-  for i in setNodes:
-    if i.company != bestSolution.company:
-      print(i.company,", Total Investement:",i.investment)
-
-
-
 def getDeltaError(sender, reciever):
 	currentValue = sender.investment + sender.investment * sender.percentChange
 	currentValue += reciever.investment + reciever.investment * reciever.percentChange
@@ -104,6 +58,14 @@ def getDeltaError(sender, reciever):
 	futureValue = tempRec + tempRec * reciever.percentChange
 	futureValue += tempSend + tempSend * sender.percentChange
 	return futureValue - currentValue
+
+
+counter = 0
+for i in g.nodes:
+  print("Stock ID:" ,counter,"| Company Name: ",i.company,", Price:", i.price)
+  counter += 1
+tfb_choice = input("Enter the Stock IDs followed by a comma and hit enter:\nExample: 1,0,2,9,3,0,4,9,5,1\n").split(",")
+
 
 
 def hillClimbing(nodeList):
