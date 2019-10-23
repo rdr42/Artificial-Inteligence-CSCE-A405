@@ -27,11 +27,10 @@ class Board():
           self.board[index] = 0
           counter = 1
           while pieceValue > 0:
-            self.board[index+counter] += 1
+            if index+counter != 13:
+              self.board[index+counter] += 1
             counter += 1
             pieceValue -= 1
-          if self.gameOver() == 1:
-            return 100
         return 1
     
     if player == '2':
@@ -46,11 +45,10 @@ class Board():
           self.board[index] = 0
           counter = 1
           while pieceValue > 0:
-            self.board[index+counter] += 1
+            if index+counter != 6:
+              self.board[index+counter] += 1
             counter += 1
             pieceValue -= 1
-          if self.gameOver() == 2:
-            return 200
         return 1
 
   def gameOver(self):
