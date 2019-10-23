@@ -63,7 +63,16 @@ class Board():
     if totalP1 == 0:
       return 1
     return 0
-    
+
+
+  def heuristic(self):
+    grade = 0
+    for i in range(7):
+      grade += self.board[i]
+    for i in range(7,14):
+      grade -= self.board[i]
+
+    return grade  
 ##    if [j+=j for j in self.board[7:13]] == 0:
 #      return 2
 #    if [i+=i for i in self.board[:6]] == 0:
