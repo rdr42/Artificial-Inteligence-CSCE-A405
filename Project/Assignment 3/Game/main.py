@@ -27,7 +27,8 @@ class Board():
           self.board[index] = 0
           counter = 1
           while pieceValue > 0:
-            self.board[index+counter] += 1
+            if index+counter != 13:
+              self.board[index+counter] += 1
             counter += 1
             pieceValue -= 1
           if self.gameOver() == 1:
@@ -46,7 +47,8 @@ class Board():
           self.board[index] = 0
           counter = 1
           while pieceValue > 0:
-            self.board[index+counter] += 1
+            if index+counter != 6:
+              self.board[index+counter] += 1
             counter += 1
             pieceValue -= 1
           if self.gameOver() == 2:
