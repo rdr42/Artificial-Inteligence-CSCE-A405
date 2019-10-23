@@ -31,8 +31,6 @@ class Board():
               self.board[index+counter] += 1
             counter += 1
             pieceValue -= 1
-          if self.gameOver() == 1:
-            return 100
         return 1
     
     if player == '2':
@@ -51,8 +49,6 @@ class Board():
               self.board[index+counter] += 1
             counter += 1
             pieceValue -= 1
-          if self.gameOver() == 2:
-            return 200
         return 1
 
   def gameOver(self):
