@@ -1,3 +1,5 @@
+import math
+
 class Board():
   def __init__(self):
     self.board = [3,3,3,3,3,3,0,3,3,3,3,3,3,0]
@@ -134,6 +136,23 @@ class Board():
 
     return grade
 
+  def alphabeta(self):
+  	possibleMoves = []
+  	for i in self.op1:
+  		if self.board[i] != 0:
+  			possibleMoves.append(i)
+  	
+  	for i in possibleMoves:
+  		newNode 
+  		newBoard = self.board.copy()
+
+
+class Node():
+	def __init__(self):
+		self.children = None
+		self.board = None
+		self.depth = None
+		self.max = True
 ##    if [j+=j for j in self.board[7:13]] == 0:
 #      return 2
 #    if [i+=i for i in self.board[:6]] == 0:
