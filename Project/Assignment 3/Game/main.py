@@ -183,7 +183,7 @@ class Board():
         for i in self.op1:
             if node.board[i] != 0:
                 possibleMoves.append(i)
-      else
+      else:
         for i in self.op2:
             if node.board[i] != 0:
                 possibleMoves.append(i)
