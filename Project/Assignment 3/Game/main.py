@@ -179,9 +179,14 @@ class Board():
       possibleMoves = []
       if node.depth == 0 or self.gameOver(node.board):
           return
-      for i in self.op1:
-          if node.board[i] != 0:
-              possibleMoves.append(i)
+      if node.player == 0:
+        for i in self.op1:
+            if node.board[i] != 0:
+                possibleMoves.append(i)
+      else
+        for i in self.op2:
+            if node.board[i] != 0:
+                possibleMoves.append(i)
       
       for i in possibleMoves:
           childNode = Node()
