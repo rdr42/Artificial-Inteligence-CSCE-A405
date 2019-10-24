@@ -10,21 +10,21 @@ class Board():
     print('  ',self.board[0],self.board[1],self.board[2],self.board[3],self.board[4],self.board[5])
 
   #Returns true if current player is able to steal stones from opponent's board
-  def shouldSteal(self,pieceValue,index,counter,player):
+  def shouldSteal(self,pieceValue,index,player):
     arr = []
     if player == '1':
       arr = self.op1
     else:
       arr = self.op2
-    if pieceValue == 1 and self.board[index+counter] == 0 and index+counter in arr:
+    if pieceValue == 1 and self.board[index] == 0 and index in arr:
       return True
     else:
       return False
     
   #Steals the opponents stones opposite to current cup and put them into our cup
-  def stealing(self,player,counter,index):
+  def stealing(self,player,index):
     arr = []
-    position = index + counter
+    position = index
     cupIndex = None
     steal = None
     if player == '1':
@@ -78,14 +78,13 @@ class Board():
           self.board[index] = 0
           counter = 1
           while pieceValue > 0:
-            if index+counter != 13:
-              #Test 
-              if self.shouldSteal(pieceValue,index,counter,player):
-                self.stealing(player,counter,index)
-              #
-              self.board[index+counter] += 1
-            counter += 1
-            pieceValue -= 1
+            increment = self.specialLoop(index)
+            if increment != 13:
+              if self.shouldSteal(pieceValue,increment,player):
+               self.stealing(player,increment)
+              self.board[increment] += 1
+              pieceValue -= 1
+            index = increment
         return 1
     
     if player == '2':
@@ -100,14 +99,13 @@ class Board():
           self.board[index] = 0
           counter = 1
           while pieceValue > 0:
-            if index+counter != 6:
-              #Test 
-              if(self.shouldSteal(pieceValue,index,counter,player)):
-                self.stealing(player,counter,index)
-              #
-              self.board[index+counter] += 1
-            counter += 1
-            pieceValue -= 1
+            increment = self.specialLoop(index)
+            if increment != 6:
+              if self.shouldSteal(pieceValue,increment,player):
+               self.stealing(player,increment)
+              self.board[increment] += 1
+              pieceValue -= 1
+            index = increment
         return 1
 
   def gameOver(self):
@@ -122,8 +120,13 @@ class Board():
     if totalP1 == 0:
       return 1
     return 0
-    
 
+  def specialLoop(self,index):
+    pieces = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
+    if index == 13:
+      return 0
+    else:
+      return index + 1
 
   def heuristic(self):
     grade = 0
@@ -133,6 +136,130 @@ class Board():
       grade -= self.board[i]
 
     return grade
+
+  def gameLoop(self):
+    over = False
+    self.printBoard()
+    bad = True
+    if bad:
+      while bad:
+        currentPlayer = input("Who goes first? Computer or Opponent ? (1 or 2)\n")
+        if currentPlayer != '1':
+          if currentPlayer != '2':
+            print("BAD INPUT. Type 1 for computer or 2 for opponent.")
+            bad = True
+          else:
+            bad = False
+        else:
+          if currentPlayer != '1':
+            print("BAD INPUT. Type 1 for computer or 2 for opponent.")
+            bad = True
+          else:
+            bad = False
+    print(" ")
+    while not over:
+      print("*********************************")
+      print(" ")
+      self.printBoard()
+      print(" ")
+      print("*********************************")
+      if currentPlayer == '1':
+        # DELETE THIS BLOCK WHEN AI STUFF READY
+        chooseMove = int(input("Computer goes! Input options: 0 1 2 3 4 5:\n------------------------------------\n")) #some function takes in current board state
+        # DELETE THIS BLOCK WHEN AI STUFF READY
+
+        #UNCOMMENT THIS BLOCK WHEN AI FUNCTION READY (Make sure you pass a copy of the board) Also, make sure you pass an integer back too.
+        #
+        #********************
+        #
+        #choseMove = somefunction(self.board)
+        #
+        #********************
+        #
+        #UNCOMMENT THIS BLOCK WHEN AI FUNCTION READY
+
+        moveError = self.movePiece(chooseMove,currentPlayer)
+        if moveError == -1 or moveError == 0:
+          if moveError == -1:
+            print('Invalid index, please play again.')
+          if moveError == 0:
+            print('Invalid index, there is nothing there')
+          goodMove = False
+          while not goodMove:
+            # DELETE THIS BLOCK WHEN AI STUFF READY
+            chooseMove = int(input("Computer goes! Input options: 0 1 2 3 4 5:\n------------------------------------\n")) #some function takes in current board state
+            # DELETE THIS BLOCK WHEN AI STUFF READY
+
+            #UNCOMMENT THIS BLOCK WHEN AI FUNCTION READY (Make sure you pass a copy of the board) Also, make sure you pass an integer back too.
+            #
+            #********************
+            #
+            #choseMove = somefunction(self.board)
+            #
+            #********************
+            #
+            #UNCOMMENT THIS BLOCK WHEN AI FUNCTION READY
+
+            moveError = self.movePiece(chooseMove,currentPlayer)
+            if moveError != -1 and moveError != 0:
+              goodMove = True
+        print("|| Original Move: ",chooseMove,", Decoded move for other team: ",self.decodeMove(chooseMove)," ||")
+        currentPlayer = '2'
+      else:
+        chooseMove = int(input("Opponent, input options: 7 8 9 10 11 12:\n------------------------------------\n")) #some function takes in current board state
+        moveError = self.movePiece(chooseMove,currentPlayer)
+        if moveError == -1 or moveError == 0:
+          if moveError == -1:
+            print('Invalid index, please play again.')
+          if moveError == 0:
+            print('Invalid index, there is nothing there')
+          goodMove = False
+          while not goodMove:
+            chooseMove = int(input("Opponent, input options: 7 8 9 10 11 12:\n------------------------------------\n"))
+            moveError = self.movePiece(chooseMove,currentPlayer)
+            if moveError != -1 and moveError != 0:
+              goodMove = True
+        currentPlayer = '1'
+       
+        if self.gameOver:
+          print("Game is over")
+          self.printBoard()
+          print(" ")
+          score = self.collectStones()
+          print("Our Total: ",score[0],", Opponent Total: ",score[1])
+          if score[0] > score[1]:
+            print("WE WON !!!!!!!!!!!!!!!!!")
+          elif score[0] == score[1]:
+            print("WE TIED.")
+          else:
+            print("Opponent won.")
+          over = True
+
+  def collectStones(self):
+    playerOneStones = 0
+    playerTwoStones = 0
+    for i in self.board[:6]:
+      playerOneStones += i
+    
+    for j in self.board[7:13]:
+      playerTwoStones += j
+
+    return [playerOneStones,playerTwoStones]
+
+  def decodeMove(self,move):
+    if move == 0:
+      return 7
+    if move == 1:
+      return 8
+    if move == 2:
+      return 9
+    if move == 3:
+      return 10
+    if move == 4:
+      return 11
+    if move == 5:
+      return 12
+
 
 ##    if [j+=j for j in self.board[7:13]] == 0:
 #      return 2
@@ -149,17 +276,8 @@ class Board():
 
 a = Board()
 #hard coded board
-a.board = [3,4,3,3,3,0,0,3,3,3,3,3,0,0]
-a.printBoard()
+a.gameLoop()
 
-c = a.movePiece(1,'1')
-print(" ")
-print(" ")
-a.printBoard()
 
-c = a.movePiece(9,'2')
-print(" ")
-print(" ")
-a.printBoard()
 
 #print(c)
