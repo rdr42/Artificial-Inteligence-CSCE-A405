@@ -131,13 +131,13 @@ class Board():
     for i in board[7:13]:
       totalP2 += i
     if totalP2 == 0:
-      return 2
+      return True
     totalP1 = 0
     for i in board[:6]:
       totalP1 += i
     if totalP1 == 0:
-      return 1
-    return 0
+      return True
+    return False
 
 
   def alphaBeta(self,node, a, b):
