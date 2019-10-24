@@ -1,3 +1,14 @@
+import math
+from datetime import datetime
+
+class Node():
+    def __init__(self):
+        self.children = {}
+        self.board = None
+        self.depth = None
+        self.player = None
+        self.index = None
+
 class Board():
   def __init__(self):
     self.board = [3,3,3,3,3,3,0,3,3,3,3,3,3,0]
@@ -60,29 +71,36 @@ class Board():
     self.board[steal] = 0
     self.board[cupIndex] += stolenStones
 
+  
+  def specialLoop(self, index):
+  	if index < 13:
+  		return index + 1
+  	else:
+  		return 0
+
   # Returns -1 if index is invalid for player
   # Returns 1 if value at index is valid
   # Returns 0 if value at index is 0
   # Returns 100 if player 1 wins
   # Returns 200 if player 2 wins
-  def movePiece(self,index,player):
+  def movePiece(self,board,index,player):
     if player == '1':
       if index not in self.op1:
         return -1
       else:
         #get value of index piece
-        if self.board[index] == 0:
+        if board[index] == 0:
           return 0
         else:
-          pieceValue = self.board[self.op1[index]]
-          self.board[index] = 0
+          pieceValue = board[self.op1[index]]
+          board[index] = 0
           counter = 1
           while pieceValue > 0:
             increment = self.specialLoop(index)
             if increment != 13:
               if self.shouldSteal(pieceValue,increment,player):
                self.stealing(player,increment)
-              self.board[increment] += 1
+              board[increment] += 1
               pieceValue -= 1
             index = increment
         return 1
@@ -92,11 +110,11 @@ class Board():
         return -1
       else:
         #get value of index piece
-        if self.board[index] == 0:
+        if board[index] == 0:
           return 0
         else:
-          pieceValue = self.board[index]
-          self.board[index] = 0
+          pieceValue = board[index]
+          board[index] = 0
           counter = 1
           while pieceValue > 0:
             increment = self.specialLoop(index)
@@ -108,36 +126,80 @@ class Board():
             index = increment
         return 1
 
-  def gameOver(self):
+  def gameOver(self, board):
     totalP2 = 0
-    for i in self.board[7:13]:
+    for i in board[7:13]:
       totalP2 += i
     if totalP2 == 0:
       return 2
     totalP1 = 0
-    for i in self.board[:6]:
+    for i in board[:6]:
       totalP1 += i
     if totalP1 == 0:
       return 1
     return 0
 
-  def specialLoop(self,index):
-    pieces = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
-    if index == 13:
-      return 0
-    else:
-      return index + 1
 
-  def heuristic(self):
+  def alphaBeta(self,node, a, b):
+      alpha = (a, None)
+      beta = (b, None)
+      if not node.children:
+          return (self.heuristic(node.board), node.index)
+
+      # Max
+      if node.player == 0:
+          for key in node.children:
+              val = self.alphaBeta(node.children[key], alpha[0], beta[0])
+              if val[0] > alpha[0]:
+                  alpha = (val[0], node.children[key].index)
+              if alpha[0] >= beta[0]:
+                  break
+          return alpha
+      # Min
+      if node.player == 1:
+          for key in node.children:
+              val = self.alphaBeta(node.children[key], alpha[0], beta[0])
+              if val[0] < beta[0]:
+                  beta = (val[0], node.children[key].index)
+              if beta[0] <= alpha[0]:
+                  break
+          return beta
+
+
+  def heuristic(self, board):
     grade = 0
     for i in range(7):
-      grade += self.board[i]
+      grade += board[i]
     for i in range(7,14):
-      grade -= self.board[i]
+      grade -= board[i]
 
     return grade
 
+  def createTree(self, node):
+      possibleMoves = []
+      if node.depth == 0 or self.gameOver(node.board):
+          return
+      for i in self.op1:
+          if node.board[i] != 0:
+              possibleMoves.append(i)
+      
+      for i in possibleMoves:
+          childNode = Node()
+          childBoard = node.board.copy()
+          self.movePiece(childBoard, i, node.player)
+          childNode.board = childBoard
+          childNode.depth = node.depth - 1
+          if node.player == 0:
+              childNode.player = 1
+          else:
+              childNode.player = 0
+          node.children[i] = childNode
+          node.index = i
+          self.createTree(childNode)
+
+
   def gameLoop(self):
+    depth = 8
     over = False
     self.printBoard()
     bad = True
@@ -164,21 +226,17 @@ class Board():
       print(" ")
       print("*********************************")
       if currentPlayer == '1':
-        # DELETE THIS BLOCK WHEN AI STUFF READY
-        chooseMove = int(input("Computer goes! Input options: 0 1 2 3 4 5:\n------------------------------------\n")) #some function takes in current board state
-        # DELETE THIS BLOCK WHEN AI STUFF READY
 
-        #UNCOMMENT THIS BLOCK WHEN AI FUNCTION READY (Make sure you pass a copy of the board) Also, make sure you pass an integer back too.
-        #
-        #********************
-        #
-        #choseMove = somefunction(self.board)
-        #
-        #********************
-        #
-        #UNCOMMENT THIS BLOCK WHEN AI FUNCTION READY
-
-        moveError = self.movePiece(chooseMove,currentPlayer)
+        node = Node()
+        node.board = self.board
+        node.depth = depth
+        node.player = 0
+        before = datetime.now()
+        self.createTree(node)
+        chooseMove = self.alphaBeta(node, float("-inf"), float("inf"))[1]
+        after = datetime.now()
+        print("Time taken:", after - before)
+        moveError = self.movePiece(self.board, chooseMove,currentPlayer)
         if moveError == -1 or moveError == 0:
           if moveError == -1:
             print('Invalid index, please play again.')
@@ -186,28 +244,25 @@ class Board():
             print('Invalid index, there is nothing there')
           goodMove = False
           while not goodMove:
-            # DELETE THIS BLOCK WHEN AI STUFF READY
-            chooseMove = int(input("Computer goes! Input options: 0 1 2 3 4 5:\n------------------------------------\n")) #some function takes in current board state
-            # DELETE THIS BLOCK WHEN AI STUFF READY
+            
 
-            #UNCOMMENT THIS BLOCK WHEN AI FUNCTION READY (Make sure you pass a copy of the board) Also, make sure you pass an integer back too.
-            #
-            #********************
-            #
-            #choseMove = somefunction(self.board)
-            #
-            #********************
-            #
-            #UNCOMMENT THIS BLOCK WHEN AI FUNCTION READY
-
-            moveError = self.movePiece(chooseMove,currentPlayer)
+            node = Node()
+            node.board = self.board
+            node.depth = depth
+            node.player = 0
+            before = datetime.now()
+            self.createTree(node)
+            chooseMove = self.alphaBeta(node, float("-inf"), float("inf"))[1]
+            after = datetime.now()
+            print(after - before)
+            moveError = self.movePiece(self.board, chooseMove,currentPlayer)
             if moveError != -1 and moveError != 0:
               goodMove = True
         print("|| Original Move: ",chooseMove,", Decoded move for other team: ",self.decodeMove(chooseMove)," ||")
         currentPlayer = '2'
       else:
         chooseMove = int(input("Opponent, input options: 7 8 9 10 11 12:\n------------------------------------\n")) #some function takes in current board state
-        moveError = self.movePiece(chooseMove,currentPlayer)
+        moveError = self.movePiece(self.board,chooseMove,currentPlayer)
         if moveError == -1 or moveError == 0:
           if moveError == -1:
             print('Invalid index, please play again.')
@@ -216,12 +271,12 @@ class Board():
           goodMove = False
           while not goodMove:
             chooseMove = int(input("Opponent, input options: 7 8 9 10 11 12:\n------------------------------------\n"))
-            moveError = self.movePiece(chooseMove,currentPlayer)
+            moveError = self.movePiece(self.board,chooseMove,currentPlayer)
             if moveError != -1 and moveError != 0:
               goodMove = True
         currentPlayer = '1'
        
-        if self.gameOver:
+        if self.gameOver(self.board):
           print("Game is over")
           self.printBoard()
           print(" ")
@@ -238,11 +293,10 @@ class Board():
   def collectStones(self):
     playerOneStones = 0
     playerTwoStones = 0
-    for i in self.board[:6]:
-      playerOneStones += i
-    
-    for j in self.board[7:13]:
-      playerTwoStones += j
+    for i in range(7):
+      playerOneStones += self.board[i]
+    for i in range(7,14):
+      playerTwoStones += self.board[i]
 
     return [playerOneStones,playerTwoStones]
 
@@ -261,23 +315,8 @@ class Board():
       return 12
 
 
-##    if [j+=j for j in self.board[7:13]] == 0:
-#      return 2
-#    if [i+=i for i in self.board[:6]] == 0:
-#      return 1
+def main():
+	a = Board()
+	a.gameLoop()
 
-#North Player is '1'
-# Moves   12 11 10 9 8 7
-# GoalN 13            
-
-#South Player is '2'
-# Moves   0  1  2  3  4 5  
-# GoalS 6
-
-a = Board()
-#hard coded board
-a.gameLoop()
-
-
-
-#print(c)
+main()
