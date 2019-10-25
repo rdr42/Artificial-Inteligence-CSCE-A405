@@ -1,6 +1,10 @@
 # Assignment 3
 # main.py
-# EJ Rasmussen, Rafael Reis, Hunter Johnson
+# EJ Rasmussen erasmussen3@alaska.edu
+# Rafael Reis rrdosreis@alaska.edu 
+# Hunter Johnson huntergj2020@gmail.com
+
+
 import math
 import copy
 from datetime import datetime
@@ -208,7 +212,7 @@ class Board():
 
 
   def gameLoop(self):
-    depth = 8
+    depth = int(input("Input the depth of the alpha beta cutoff, positive integers only:\n"))
     over = False
     self.printBoard()
     bad = True
@@ -243,7 +247,6 @@ class Board():
         before = datetime.now()
         self.createTree(node)
         chooseMove = self.alphaBeta(node, float("-inf"), float("inf"))[1]
-        print("Recieved form alpha beta:", chooseMove)
         after = datetime.now()
         print("Time taken:", after - before)
         moveError = self.movePiece(self.board, chooseMove,currentPlayer)
