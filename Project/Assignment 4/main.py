@@ -1,29 +1,50 @@
-from sudoku import *
 from os import listdir
 from os.path import isfile, join
 from board import *
+import time
+import csv
+
+
 
 fileDirectoryPath = 'sudos/'
 
 #Get all files within sudos directory
 fileNames = [f for f in listdir(fileDirectoryPath) if isfile(join(fileDirectoryPath, f))]
 
-sudokuGames = Board()
+sudokuGames = Game()
 #Loop through fileNames within fileDirectoryPath and 
 for i in fileNames:
     f = open(fileDirectoryPath+i, 'r')
-    oneGame = [line.rstrip('\n') for line in f.readlines()]
+    game = [line.rstrip('\n') for line in f.readlines()]
+    game = [line.rstrip('\r') for line in game]
     f.close()
-    node = Node(oneGame)
-    node.sanitize()
-    sudokuGames.board.append(node)
+    matrix = Matrix(game)
+    matrix.sanitize()
+    sudokuGames.board.append(matrix)
+    sudokuGames.name = i
 
-#Loop through all sudoku games and print their boards
-for i in sudokuGames.board:
-    i.printBoard()
+print(fileNames.sort())
+#All games stored in sudokuGames in sudokGames.board.
+counter = 0 
+with open('solver.csv', 'w') as csvfile:
+  filewriter = csv.writer(csvfile, delimiter=',',quotechar='|', quoting=csv.QUOTE_MINIMAL)
+  filewriter.writerow(['Filename', 'Duration'])
+  for game in sudokuGames.board:
+    start_time = time.time()
+    print("\nRunning sudoku solver on: ",fileNames[counter],"\n")
+    print("Starting a new sudoku game, good luck !\n")
+    aGame = game.matrix
+    sudoku = Sudoku(aGame)
+    print("Original Board:\n")
+    sudoku.printBoard()
+    print("Now, solving...")
+    if(sudoku.backtrackSolver(sudoku)):
+      print("Solved!")
+      sudoku.printBoard()
+    else:
+      print("Unable to solve sudoku.")
+    print("Time taken to complete execution:\n ")
+    print("--- %s seconds ---" % (time.time() - start_time))
+    filewriter.writerow([fileNames[counter], (time.time() - start_time)])
 
-#Access a sudoku game via i.matrix
-for i in sudokuGames.board:
-    currentGame = i.matrix
-    print(currentGame)
-    #Do something with current game
+    counter += 1
